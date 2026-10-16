@@ -1,0 +1,90 @@
+# Paperclip on TrueNAS: standalone compose for Apps > Discover Apps > "Install via YAML".
+# Works as-is except for the ONE line marked CHANGE_ME (your server address). See docs/INSTALL-YAML.md.
+name: paperclip
+
+services:
+  postgres:
+    image: postgres:17.11-trixie@sha256:2d2b8998d31037bf721cfdf764d76ba74171b4fab3431b7f72c27c56ddbdf9e3
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: paperclip
+      POSTGRES_DB: paperclip
+      # Not published to the network: only reachable by the paperclip container.
+      POSTGRES_PASSWORD: paperclip
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paperclip -d paperclip"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      # Docker-managed volume (works with no setup). To use your own dataset instead,
+      # replace with e.g. /mnt/tank/apps/paperclip/postgres:/var/lib/postgresql
+      - postgres-data:/var/lib/postgresql
+
+  paperclip:
+    image: ghcr.io/paperclipai/paperclip:2026.1012.0@sha256:1661b3dd3fdf7a9b59542d1ced464c3faf9dc8309798b4d15a9923ed32795307
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # The image starts as root, remaps its "node" user to USER_UID/USER_GID, chowns
+    # /paperclip, then drops privileges. Hence the small capability set.
+    user: "0:0"
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, KILL, SETGID, SETUID]
+    security_opt: ["no-new-privileges=true"]
+    pids_limit: 2048
+    stop_grace_period: 60s
+    ports:
+      - "30528:3100"
+    # Creates the two signing secrets once (kept in the data volume, so they survive
+    # updates), then hands over to the image's own entrypoint.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        d=/paperclip/.truenas
+        mkdir -p "$$d"
+        gen() {
+          f="$$d/$$1"
+          if [ ! -s "$$f" ]; then (umask 077; node -e 'process.stdout.write(require("crypto").randomBytes(32).toString("hex"))' > "$$f"); fi
+          cat "$$f"
+        }
+        [ -n "$$BETTER_AUTH_SECRET" ] || export BETTER_AUTH_SECRET="$$(gen better_auth_secret)"
+        [ -n "$$PAPERCLIP_TOOL_ACTION_SIGNING_SECRET" ] || export PAPERCLIP_TOOL_ACTION_SIGNING_SECRET="$$(gen tool_action_signing_secret)"
+        exec /usr/bin/tini -- docker-entrypoint.sh "$$@"
+      - paperclip
+    command: ["node", "--import", "./server/node_modules/tsx/dist/loader.mjs", "server/dist/index.js"]
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "3100"
+      SERVE_UI: "true"
+      PAPERCLIP_HOME: /paperclip
+      USER_UID: "568"
+      USER_GID: "568"
+      DATABASE_URL: postgres://paperclip:paperclip@postgres:5432/paperclip?sslmode=disable
+      PAPERCLIP_DEPLOYMENT_MODE: authenticated
+      PAPERCLIP_DEPLOYMENT_EXPOSURE: private
+      # CHANGE_ME: your TrueNAS address as you type it in the browser, e.g. http://192.168.1.10:30528
+      # (Paperclip only accepts requests for hostnames it knows about.)
+      PAPERCLIP_PUBLIC_URL: http://<truenas-ip>:30528
+      # Optional: more names you also use to open it (LAN DNS name, Tailscale), comma-separated
+      PAPERCLIP_ALLOWED_HOSTNAMES: ""
+      # Optional agent API keys
+      ANTHROPIC_API_KEY: ""
+      OPENAI_API_KEY: ""
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "--fail", "--output", "/dev/null", "http://127.0.0.1:3100/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      # Docker-managed volume (works with no setup). To use your own dataset instead,
+      # replace with e.g. /mnt/tank/apps/paperclip/data:/paperclip
+      - paperclip-data:/paperclip
+
+volumes:
+  postgres-data:
+  paperclip-data:

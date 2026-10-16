@@ -1,0 +1,55 @@
+app_version: 2026.1012.0
+capabilities:
+- description: Paperclip is able to change file ownership arbitrarily
+  name: CHOWN
+- description: Paperclip is able to bypass file permission checks
+  name: DAC_OVERRIDE
+- description: Paperclip is able to bypass permission checks for file operations
+  name: FOWNER
+- description: Paperclip is able to send signals to processes owned by other users (graceful shutdown)
+  name: KILL
+- description: Paperclip is able to change group ID of processes
+  name: SETGID
+- description: Paperclip is able to change user ID of processes
+  name: SETUID
+categories:
+- productivity
+changelog_url: https://github.com/paperclipai/paperclip/releases
+date_added: '2026-10-16'
+description: Paperclip is an open-source control plane for AI agents. Organize agents
+  from any provider (Claude, Codex, Gemini, Cursor and more) into a company with
+  org charts, goals, budgets, ticketing and governance.
+home: https://paperclip.ing
+host_mounts: []
+icon: https://raw.githubusercontent.com/paperclipai/paperclip/master/ui/public/apple-touch-icon.png
+keywords:
+- ai
+- agents
+- orchestration
+- automation
+lib_version: 2.3.16
+lib_version_hash: 724ad72dada54c4b4fc478e8545dc6023d5c16a4aee09d3d5ef67f1f02c418ff
+maintainers:
+- email: dev@truenas.com
+  name: truenas
+  url: https://www.truenas.com/
+name: paperclip
+run_as_context:
+- description: Container [paperclip] starts as root, then drops to the configured user and group.
+  gid: 568
+  group_name: Host group is [apps]
+  uid: 568
+  user_name: Host user is [apps]
+- description: Container [postgres] runs as non-root user and group.
+  gid: 999
+  group_name: Host group is [docker]
+  uid: 999
+  user_name: Host user is [netdata]
+screenshots: []
+sources:
+- https://paperclip.ing
+- https://github.com/paperclipai/paperclip
+- https://github.com/paperclipai/paperclip/pkgs/container/paperclip
+title: Paperclip
+train: community
+version: 1.0.0

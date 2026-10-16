@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # weekly: catches breakage from the truenas/apps renderer or base images changing
+    - cron: "17 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  standalone-install:
+    name: Standalone compose installs and runs
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shellcheck scripts
+        run: shellcheck --severity=warning scripts/*.sh
+      - name: Install smoke test
+        run: ./scripts/smoke-compose.sh
+
+  catalog-install:
+    name: TrueNAS catalog app renders, installs and passes metadata check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout truenas/apps (renderer, validators, library)
+        uses: actions/checkout@v4
+        with:
+          repository: truenas/apps
+          path: truenas-apps
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python deps
+        run: pip install pyyaml
+
+      - name: Add Paperclip to the catalog checkout
+        run: |
+          mkdir -p truenas-apps/ix-dev/community/paperclip
+          cp -R ix-dev/community/paperclip/. truenas-apps/ix-dev/community/paperclip/
+
+      - name: Default port is unique across the catalog
+        working-directory: truenas-apps
+        run: python3 .github/scripts/port_validation.py
+
+      - name: Render and install (all-options values)
+        working-directory: truenas-apps
+        run: python3 .github/scripts/ci.py --train community --app paperclip --test-file basic-values.yaml
+
+      - name: Render and install (out-of-the-box defaults)
+        working-directory: truenas-apps
+        run: python3 .github/scripts/ci.py --train community --app paperclip --test-file defaults-values.yaml
+
+      - name: Metadata is up to date
+        working-directory: truenas-apps
+        run: |
+          python3 .github/scripts/generate_metadata.py --train community --app paperclip
+          if ! diff -ru "$GITHUB_WORKSPACE/ix-dev/community/paperclip" ix-dev/community/paperclip \
+               --exclude=rendered --exclude=library; then
+            echo "::error::Generated metadata differs. Copy the generated files from the diff above (app.yaml, item.yaml) into ix-dev/community/paperclip and commit."
+            exit 1
+          fi
