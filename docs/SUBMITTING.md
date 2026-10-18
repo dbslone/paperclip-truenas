@@ -10,9 +10,9 @@ The app lives in `ix-dev/community/paperclip/`. The official catalog only accept
 - [ ] Default port unique: run `.github/scripts/port_validation.py` in your fork (30528 was free on 2026-10-16; re-check)
 - [ ] Run full CI on Linux: `.github/scripts/ci.py --app paperclip --train community --test-file basic-values.yaml`
       (does not work in Docker Desktop on macOS: the validator image needs `openat2`)
-- [ ] `devbox run copy-lib` to regenerate `templates/library/` and `lib_version_hash` if lib version changed
+- [x] Library vendored at 2.3.17 (upstream removes old versions; if CI says `Library version ... not found in hashes`, bump `lib_version` + re-vendor with `apps_catalog_hash_generate` / `devbox run copy-lib`)
 - [ ] Install on a real TrueNAS box and click through: install, claim admin, restart, upgrade
-- [x] Icon: upstream logo, `assets/icon.png` (180x180 PNG)
+- [x] Icon: upstream logo, `assets/icon.png` (180x180 PNG). `app.yaml` already uses the required `media.sys.truenas.net` URL; attach the PNG to the PR so the reviewer uploads it
 - [ ] 2-3 screenshots ready to attach to the PR
 
 ## Steps

@@ -56,7 +56,7 @@ Every push and PR runs two install tests on GitHub Actions:
 - Image is pinned to a release tag + digest; Renovate in the upstream repo bumps it after merge.
 - The container starts as root and the image entrypoint drops to the configured UID/GID (default 568),
   which is why `CHOWN`, `DAC_OVERRIDE`, `FOWNER`, `KILL`, `SETUID`, `SETGID` are granted (`KILL` lets `tini` forward stop signals for a clean shutdown).
-- The icon is the upstream Paperclip logo (`assets/icon.png`), referenced by its raw GitHub URL. The catalog reviewer may re-host it on the TrueNAS CDN; screenshots are still to do.
+- The icon is the upstream Paperclip logo (`assets/icon.png`). The catalog only accepts icons hosted on the TrueNAS CDN, so `app.yaml` points at the CDN path the reviewer will upload it to; until then the catalog app shows a placeholder icon. Screenshots are still to do.
 - Verified locally: rendered with the official renderer, and booted on Docker with the same caps/user/Postgres 17 settings. Not yet tested on a live TrueNAS system: please report results in issues.
 - `scripts/test-local.sh` needs Linux (the catalog's validator image fails on Docker Desktop for macOS).
 
