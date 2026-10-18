@@ -32,18 +32,22 @@ if grep -v -E '^[[:space:]]*#' "$COMPOSE" | grep -n -E 'CHANGE_ME|<truenas-ip>';
   echo "unsubstituted placeholder left in compose file" >&2; exit 1
 fi
 
+# /api/health answers 200 with "status":"starting" while startup recovery runs,
+# so wait for "ok" rather than for the first successful response.
 wait_healthy() {
-  for _ in $(seq 1 60); do
-    if curl -fsS -m 3 "http://localhost:$PORT/api/health" -o "$WORK/health.json" 2>/dev/null; then return 0; fi
+  for _ in $(seq 1 90); do
+    if curl -fsS -m 3 "http://localhost:$PORT/api/health" -o "$WORK/health.json" 2>/dev/null \
+       && grep -q '"status":"ok"' "$WORK/health.json"; then return 0; fi
     sleep 3
   done
-  echo "Paperclip did not become healthy" >&2; return 1
+  echo "Paperclip did not report status ok within 270s; last response:" >&2
+  cat "$WORK/health.json" >&2 2>/dev/null || true
+  return 1
 }
 
 dc config -q
 dc up -d
 wait_healthy
-grep -q '"status":"ok"' "$WORK/health.json" || { cat "$WORK/health.json"; echo "unexpected health payload" >&2; exit 1; }
 curl -fsS -m 5 "http://localhost:$PORT/" -o "$WORK/index.html" && grep -qi "<title>" "$WORK/index.html" || { echo "UI did not load" >&2; exit 1; }
 
 # the app must not be running as root after the entrypoint drops privileges
