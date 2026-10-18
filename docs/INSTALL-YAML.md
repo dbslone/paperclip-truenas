@@ -3,7 +3,7 @@
 Works on TrueNAS 25.04+ (Docker based Apps) while Paperclip is not yet in the official catalog.
 
 1. Open [`docker-compose.yaml`](../docker-compose.yaml) and change **one line**: `PAPERCLIP_PUBLIC_URL`
-   to your server address as you type it in the browser, e.g. `http://192.168.1.10:30528`.
+   to your server address as you type it in the browser, e.g. `http://192.168.1.10:30530`.
    (Paperclip only accepts requests for hostnames it knows about, so this cannot be guessed.)
 2. In TrueNAS: **Apps > Discover Apps > ⋮ (top right) > Install via YAML**, name it `paperclip`, paste the file, save.
 3. Open that address and sign in. The first sign-in claims the instance as admin.

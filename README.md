@@ -19,7 +19,7 @@ Storage: one dataset for `/paperclip` (uploads, agent workspaces, local secrets 
 ## Install form fields
 
 Everything works with the defaults except **Public URL**, which you set to your server address
-(e.g. `http://192.168.1.10:30528`); Paperclip only serves hostnames it knows about. Secrets are
+(e.g. `http://192.168.1.10:30530`); Paperclip only serves hostnames it knows about. Secrets are
 auto-generated on first start and persisted; the DB password defaults to `paperclip` (Postgres is internal only).
 Optional: Allowed Hostnames, Anthropic/OpenAI keys, and the standard TrueNAS network, storage, user/group, labels and resource settings.
 

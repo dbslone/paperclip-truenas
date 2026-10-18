@@ -10,12 +10,12 @@ Once the app is merged in the official catalog, enable the **community** train
 ## 2. Fill in the form
 
 Everything has a working default. **The only thing you must change is the Public URL**: type your server's
-address as you open it in the browser, e.g. `http://192.168.1.10:30528` (Paperclip only answers to
+address as you open it in the browser, e.g. `http://192.168.1.10:30530` (Paperclip only answers to
 hostnames it knows, so it cannot guess this). The form refuses the `<truenas-ip>` placeholder.
 
 | Field | Default | Notes |
 |-------|---------|-------|
-| Public URL | `http://<truenas-ip>:30528` | **Replace with your address.** Must match scheme, host and port |
+| Public URL | `http://<truenas-ip>:30530` | **Replace with your address.** Must match scheme, host and port |
 | Session / Tool Action Signing Secrets | empty = auto-generated | Created on first start, stored in the app data, kept across updates |
 | Database Password | `paperclip` | Postgres is internal only, never published |
 | Allowed Hostnames | empty | Extra names you also use (LAN DNS, Tailscale) |

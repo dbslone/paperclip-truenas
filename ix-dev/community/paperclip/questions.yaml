@@ -81,14 +81,14 @@ questions:
           label: Public URL
           description: |
             The URL you will use in your browser to reach Paperclip,
-            including scheme and port. Example: <code>http://&lt;truenas-ip&gt;:30528</code> (replace with your server address)</br>
+            including scheme and port. Example: <code>http://&lt;truenas-ip&gt;:30530</code> (replace with your server address)</br>
             Required for login and auth redirects to work.
           schema:
             type: string
-            default: "http://<truenas-ip>:30528"
+            default: "http://<truenas-ip>:30530"
             required: true
             valid_chars: "^https?://[^<>\\s/]+(/.*)?$"
-            valid_chars_error: Enter a real URL such as http://192.168.1.10:30528 (replace the <truenas-ip> placeholder).
+            valid_chars_error: Enter a real URL such as http://192.168.1.10:30530 (replace the <truenas-ip> placeholder).
         - variable: allowed_hostnames
           label: Allowed Hostnames (Optional)
           description: |
@@ -202,7 +202,7 @@ questions:
                 label: Port Number
                 schema:
                   type: int
-                  default: 30528
+                  default: 30530
                   min: 1
                   max: 65535
                   required: true

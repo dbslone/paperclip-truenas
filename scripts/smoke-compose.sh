@@ -24,8 +24,8 @@ cleanup() {
 trap cleanup EXIT
 
 sed \
-  -e "s#http://<truenas-ip>:30528#http://localhost:$PORT#" \
-  -e "s#\"30528:3100\"#\"$PORT:3100\"#" \
+  -e "s#http://<truenas-ip>:30530#http://localhost:$PORT#" \
+  -e "s#\"30530:3100\"#\"$PORT:3100\"#" \
   "$ROOT/docker-compose.yaml" > "$COMPOSE"
 
 if grep -v -E '^[[:space:]]*#' "$COMPOSE" | grep -n -E 'CHANGE_ME|<truenas-ip>'; then
