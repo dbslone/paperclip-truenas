@@ -62,4 +62,12 @@ dc start paperclip
 # restart: migrations + existing data dir must come back healthy
 dc restart paperclip
 wait_healthy
-echo "OK: standalone compose installs, serves UI/health as uid 568, and survives a restart"
+
+# recreate (what TrueNAS does on stop/start or edit): database contents must survive
+dc exec -T postgres psql -qU paperclip -d paperclip -c "create table smoke_marker(x int); insert into smoke_marker values (1);"
+dc down
+dc up -d
+wait_healthy
+[ "$(dc exec -T postgres psql -tAU paperclip -d paperclip -c 'select count(*) from smoke_marker')" = "1" ] \
+  || { echo "database contents were lost when the containers were recreated" >&2; exit 1; }
+echo "OK: standalone compose installs, serves UI/health as uid 568, and keeps its data across restart and recreate"
