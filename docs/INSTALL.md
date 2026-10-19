@@ -35,6 +35,7 @@ the form, or sign in per agent from the Paperclip UI. Agent workspaces live in t
 
 ## Troubleshooting
 
+- **Agent CLI sign-in (e.g. `claude`) keeps asking you to log in**: CLI logins from the TrueNAS Shell are run as the app user automatically. On app versions before this fix they ran as root and left credentials Paperclip cannot read; restart the app once (it re-owns `/paperclip`) and sign in again, or run `gosu node claude`.
 - **Login loops or redirects to the wrong host**: Public URL does not match the address in your browser; add the other name to Allowed Hostnames.
 - **Permission errors on Host Path storage**: the path must be writable by the configured UID/GID (default 568).
 - **Slow stop**: Paperclip waits for running agents to settle; TrueNAS caps this at 60 s.
