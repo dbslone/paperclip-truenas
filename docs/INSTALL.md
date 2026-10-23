@@ -9,14 +9,17 @@ Once the app is merged in the official catalog, enable the **community** train
 
 ## 2. Fill in the form
 
-Everything has a working default. **The only thing you must change is the Public URL**: type your server's
-address as you open it in the browser, e.g. `http://192.168.1.10:30530` (Paperclip only answers to
-hostnames it knows, so it cannot guess this). The form refuses the `<truenas-ip>` placeholder.
+You must fill in three fields:
+
+- **Public URL**: your server's address as you open it in the browser, e.g. `http://192.168.1.10:30530`
+  (Paperclip only answers to hostnames it knows, so it cannot guess this). The form refuses the `<truenas-ip>` placeholder.
+- **Session Signing Secret** and **Tool Action Signing Secret**: two different random values, e.g. from
+  `openssl rand -hex 32` run twice. Keep them; changing the session secret logs everyone out.
 
 | Field | Default | Notes |
 |-------|---------|-------|
 | Public URL | `http://<truenas-ip>:30530` | **Replace with your address.** Must match scheme, host and port |
-| Session / Tool Action Signing Secrets | empty = auto-generated | Created on first start, stored in the app data, kept across updates |
+| Session / Tool Action Signing Secrets | none (required) | At least 32 characters each, must differ |
 | Database Password | `paperclip` | Postgres is internal only, never published |
 | Allowed Hostnames | empty | Extra names you also use (LAN DNS, Tailscale) |
 | Anthropic / OpenAI API Key | empty | Optional |
@@ -35,7 +38,7 @@ the form, or sign in per agent from the Paperclip UI. Agent workspaces live in t
 
 ## Troubleshooting
 
-- **Agent CLI sign-in (e.g. `claude`) keeps asking you to log in**: CLI logins from the TrueNAS Shell are run as the app user automatically. On app versions before this fix they ran as root and left credentials Paperclip cannot read; restart the app once (it re-owns `/paperclip`) and sign in again, or run `gosu node claude`.
+- **Agent CLI sign-in (e.g. `claude`) keeps asking you to log in**: the container runs as the app user, so the TrueNAS Shell opens as that user and CLI logins land where Paperclip can read them. If you signed in from an older app version that ran as root, restart the app once (the permissions container re-owns `/paperclip`) and sign in again.
 - **Login loops or redirects to the wrong host**: Public URL does not match the address in your browser; add the other name to Allowed Hostnames.
 - **Permission errors on Host Path storage**: the path must be writable by the configured UID/GID (default 568).
 - **Slow stop**: Paperclip waits for running agents to settle; TrueNAS caps this at 60 s.

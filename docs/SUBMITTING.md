@@ -5,7 +5,7 @@ The app lives in `ix-dev/community/paperclip/`. The official catalog only accept
 ## Pre-flight checklist
 
 - [x] App renders with the catalog's own renderer (`apps_render_app`), output reviewed
-- [x] Boots against Postgres 17 with `cap_drop: ALL` + six caps (incl. KILL), process runs as UID 568, `/api/health` is 200
+- [ ] Boots against Postgres 17 with `cap_drop: ALL` and no extra caps, container user 568:568, `/api/health` is 200
 - [x] Image + postgres pinned by tag and digest
 - [ ] Default port unique: run `.github/scripts/port_validation.py` in your fork (30530 was free on 2026-10-16; re-check)
 - [ ] Run full CI on Linux: `.github/scripts/ci.py --app paperclip --train community --test-file basic-values.yaml`

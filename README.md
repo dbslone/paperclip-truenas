@@ -11,16 +11,16 @@ to the **community** train and installed from the TrueNAS Apps UI.
 
 | Container   | Image                                | Purpose                                   |
 |-------------|--------------------------------------|-------------------------------------------|
-| `paperclip` | `ghcr.io/paperclipai/paperclip`      | Paperclip server + UI (port 3100 inside)  |
+| `paperclip` | `ghcr.io/paperclipai/paperclip`      | Paperclip server + UI (on the WebUI port) |
 | `postgres`  | `postgres:17`                        | Database (via the catalog's Postgres dep) |
 
 Storage: one dataset for `/paperclip` (uploads, agent workspaces, local secrets key) and one for Postgres data.
 
 ## Install form fields
 
-Everything works with the defaults except **Public URL**, which you set to your server address
-(e.g. `http://192.168.1.10:30530`); Paperclip only serves hostnames it knows about. Secrets are
-auto-generated on first start and persisted; the DB password defaults to `paperclip` (Postgres is internal only).
+You must set **Public URL** to your server address (e.g. `http://192.168.1.10:30530`; Paperclip only
+serves hostnames it knows about) and the two signing secrets (`openssl rand -hex 32` for each).
+The DB password defaults to `paperclip` (Postgres is internal only).
 Optional: Allowed Hostnames, Anthropic/OpenAI keys, and the standard TrueNAS network, storage, user/group, labels and resource settings.
 
 ## Repository layout
@@ -54,8 +54,8 @@ Every push and PR runs two install tests on GitHub Actions:
 ## Status / caveats
 
 - Image is pinned to a release tag + digest; Renovate in the upstream repo bumps it after merge.
-- The container starts as root and the image entrypoint drops to the configured UID/GID (default 568),
-  which is why `CHOWN`, `DAC_OVERRIDE`, `FOWNER`, `KILL`, `SETUID`, `SETGID` are granted (`KILL` lets `tini` forward stop signals for a clean shutdown).
+- The catalog app runs Paperclip directly as the configured UID/GID (default 568) with no extra capabilities;
+  the catalog's permissions container sets ownership of the data dataset.
 - The icon is the upstream Paperclip logo (`assets/icon.png`). The catalog only accepts icons hosted on the TrueNAS CDN, so `app.yaml` points at the CDN path the reviewer will upload it to; until then the catalog app shows a placeholder icon. Screenshots are still to do.
 - Verified locally: rendered with the official renderer, and booted on Docker with the same caps/user/Postgres 17 settings. Not yet tested on a live TrueNAS system: please report results in issues.
 - `scripts/test-local.sh` needs Linux (the catalog's validator image fails on Docker Desktop for macOS).
